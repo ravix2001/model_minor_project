@@ -12,7 +12,7 @@ with open('vectorizer.pkl', 'rb') as file:
     vectorizer = pickle.load(file)
 
 # Load new dataset
-df = pd.read_csv('amazon.csv')
+df = pd.read_csv('reviews.csv')
 
 # Handle missing values in the reviewText column
 df['reviewText'] = df['reviewText'].fillna('')  # Replace NaN with an empty string

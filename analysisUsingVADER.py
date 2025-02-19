@@ -9,7 +9,7 @@ import seaborn as sns
 warnings.filterwarnings("ignore")
 
 # Load the dataset
-file_path = 'amazon.csv'  # Define the file path
+file_path = 'reviews.csv'  # Define the file path
 df = pd.read_csv(file_path)  # Load the CSV into a DataFrame
 print(df.shape)
 
