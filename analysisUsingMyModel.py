@@ -2,23 +2,70 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pandas as pd
+from deep_translator import GoogleTranslator
+from langdetect import detect
 
-# Load the trained RandomForest model
-with open('model_RandomForestClassifier.pkl', 'rb') as file:
+# Load the saved model
+
+# requires dense matrix
+# with open('model_GaussianNB.pkl', 'rb') as file:
+#     model = pickle.load(file)
+
+# very nice
+# with open('model_DecisionTreeClassifier.pkl', 'rb') as file:
+#     model = pickle.load(file)
+
+# nice
+# with open('model_RandomForestClassifier.pkl', 'rb') as file:
+#     model = pickle.load(file)
+
+# very nice
+with open('model_LogisticRegression.pkl', 'rb') as file:
     model = pickle.load(file)
+
+# very nice but GPU
+# with open('model_XGBClassifier.pkl', 'rb') as file:
+#     model = pickle.load(file)
+
+# very bad
+# with open('model_GradientBoostingClassifier.pkl', 'rb') as file:
+#     model = pickle.load(file)
+
 
 # Load the saved TF-IDF vectorizer
 with open('vectorizer.pkl', 'rb') as file:
     vectorizer = pickle.load(file)
 
 # Load new dataset
-df = pd.read_csv('reviews.csv')
+df = pd.read_csv('amazon.csv')
 
 # Handle missing values in the reviewText column
 df['reviewText'] = df['reviewText'].fillna('')  # Replace NaN with an empty string
 
+# Function to translate text to English
+def translate_to_english(text):
+    try:
+        lang = detect(text)  # Detect language
+        if lang != "en":  # If not English, translate
+            return GoogleTranslator(source='auto', target='en').translate(text)
+        return text  # If already English, return as is
+    except:
+        return text  # If detection fails, return original
+
+# Apply translation to reviewText column
+df["translated_review"] = df["reviewText"].astype(str).apply(translate_to_english)
+
+# Save the translated dataset
+df.to_csv("translated_reviews.csv", index=False)
+
+print("Translation completed and saved!")
+
 # Transform reviews using the saved vectorizer
-X_test = vectorizer.transform(df['reviewText'])
+X_test = vectorizer.transform(df['translated_review'])
+
+# # Transform reviews using the saved vectorizer
+# X_test = vectorizer.transform(df['reviewText'])
 
 # Make predictions
 predictions = model.predict(X_test)
@@ -54,13 +101,15 @@ def get_compound_score(sentiment):
 # Apply the function to calculate compound scores for each review
 df['compound'] = df['sentiment'].apply(get_compound_score)
 
-# Save the results to a new CSV file
-df[['reviewText', 'sentiment', 'compound']].to_csv('review_with_compound_scores.csv', index=False)
+# # Save the results to a new CSV file
+# df[['translated_reviews', 'sentiment', 'compound']].to_csv('review_with_compound_scores.csv', index=False)
 
+# Save the results to a new CSV file
+df[['translated_review', 'sentiment', 'compound']].to_csv('review_with_compound_scores.csv', index=False)
 print("Compound scores calculated and saved!")
 
 # Calculate the overall compound score
-compound_score = (df['compound'].mean()) * 10  # Scale compound score to 0-10
+compound_score = (df['compound'].mean()+1)/2 * 10  # Scale compound score to 0-10
 
 # Display results
 print("SENTIMENT DISTRIBUTION".center(50, '-'))

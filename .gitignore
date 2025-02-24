@@ -1,2 +1,5 @@
 train_dataset.csv
+model_GaussianNB.pkl
+model_DecisionTreeClassifier.pkl
 model_RandomForestClassifier.pkl
+model_XGBClassifier.pkl
